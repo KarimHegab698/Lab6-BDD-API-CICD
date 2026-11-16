@@ -18,7 +18,7 @@ def step_impl(context, base_url):
 @given("a bin exists with the payload '{payload}'")
 def step_impl(context, payload):
     full_url = f"{context.base_url}/b"
-    context.response = requests.post(full_url, headers=context.headers, data=payload, timeout=30)
+    context.response = requests.post(full_url, headers=context.headers, data=payload, timeout=(10, 60))
     assert context.response.status_code == 200, context.response.text
     context.bin_id = context.response.json()["metadata"]["id"]
 
