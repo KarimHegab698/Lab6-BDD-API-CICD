@@ -2,6 +2,8 @@
 import os
 import shutil
 import argparse
+import sys
+
 from behave.__main__ import main as behave_main
 
 
@@ -32,8 +34,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # 3. Get tags from Jenkins environment variable OR command-line argument
-    tags_to_run = os.getenv("BEHAVE_TAGS", args.tags)
+    # 3. CLI argument wins; fall back to the Jenkins environment variable
+    tags_to_run = args.tags or os.getenv("BEHAVE_TAGS", "")
 
     # 4. Define Behave arguments
     behave_args = []
@@ -43,12 +45,17 @@ if __name__ == "__main__":
 
     behave_args.extend([
         "--format", "allure_behave.formatter:AllureFormatter",
-        "--outfile", "reports/allure-results"
+        "--outfile", allure_results_folder,
+        "--format", "pretty",          # no --outfile => prints to console (Jenkins log)
     ])
 
     # 5. Run Behave tests
     print(f"Running Behave tests with tags: {tags_to_run or 'All scenarios'}")
-    behave_main(behave_args)
+    exit_code = behave_main(behave_args)
 
     # 6. Post-test actions
-    print("Test execution finished. To see the report, run: allure serve reports/allure-results")
+    print("Test execution finished. To see the report, run: "
+          f"allure serve {allure_results_folder}")
+
+    # 7. Propagate behave's result so Jenkins marks failed runs as failed
+    sys.exit(exit_code)
