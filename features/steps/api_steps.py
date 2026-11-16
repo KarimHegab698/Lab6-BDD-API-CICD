@@ -26,7 +26,7 @@ def step_impl(context, payload):
 @when("I create a bin with the payload '{payload}'")
 def step_impl(context, payload):
     full_url = f"{context.base_url}/b"
-    context.response = requests.post(full_url, headers=context.headers, data=payload, timeout=30)
+    context.response = requests.post(full_url, headers=context.headers, data=payload, timeout=(10, 60))
     if context.response.status_code == 200:
         context.bin_id = context.response.json()["metadata"]["id"]
 
@@ -35,20 +35,20 @@ def step_impl(context, payload):
 def step_impl(context, endpoint):
     full_url = f"{context.base_url}{endpoint}"
     # Store the response in the context to use in the 'then' step
-    context.response = requests.get(full_url, headers=context.headers, timeout=30)
+    context.response = requests.get(full_url, headers=context.headers, timeout=(10, 60))
 
 
 @when("I read the bin")
 def step_impl(context):
     full_url = f"{context.base_url}/b/{context.bin_id}/latest"
-    context.response = requests.get(full_url, headers=context.headers, timeout=30)
+    context.response = requests.get(full_url, headers=context.headers, timeout=(10, 60))
 
 
 @given("I delete the bin")
 @when("I delete the bin")
 def step_impl(context):
     full_url = f"{context.base_url}/b/{context.bin_id}"
-    context.response = requests.delete(full_url, headers=context.headers, timeout=30)
+    context.response = requests.delete(full_url, headers=context.headers, timeout=(10, 60))
     if context.response.status_code == 200:
         context.bin_deleted = True  # tells environment.py not to delete it again
 
